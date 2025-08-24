@@ -83,14 +83,17 @@ export default class DesignTicketPlugin extends Plugin {
 		// Get available story point labels
 		const storyPointOptions = this.settings.storyPointLabels.map(label => `[${label}]`).join(' ');
 		
-		// Get available category labels
-		const categoryOptions = this.settings.categoryLabels.join(', ');
+		// Get available category labels as options
+		const categoryOptions = this.settings.categoryLabels.map(label => `[${label}]`).join(' ');
+		
+		// Get available priority labels as options
+		const priorityOptions = this.settings.priorityLabels.map(label => `[${label}]`).join(' ');
 		
 		return `---
 gitlab-project-id: "${this.settings.defaultProjectId}"
 assignee: "${this.settings.defaultAssignee}"
 labels: "${categoryOptions}"
-priority: "${this.settings.defaultPriority}"
+priority: "${priorityOptions}"
 due-date: "${dueDate}"
 ---
 

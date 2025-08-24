@@ -10,6 +10,7 @@ export interface Settings {
 	defaultPriority: string;
 	storyPointLabels: string[];
 	categoryLabels: string[];
+	priorityLabels: string[];
 	customTemplates: Array<{
 		name: string;
 		content: string;
@@ -21,11 +22,12 @@ export const DEFAULT_SETTINGS: Settings = {
 	gitlabUrl: 'https://gitlab.com',
 	gitlabToken: '',
 	defaultProjectId: '',
-	defaultAssignee: '',
+	defaultAssignee: 'Andre Lima',
 	defaultLabels: 'design',
 	defaultPriority: 'medium',
 	storyPointLabels: ['1 Story Point', '2 Story Points', '3 Story Points', '5 Story Points', '8 Story Points', '13 Story Points', '21 Story Points'],
 	categoryLabels: ['UI', 'UX', 'Web Experience / Website development'],
+	priorityLabels: ['low', 'medium', 'high', 'urgent'],
 	customTemplates: []
 }
 
@@ -143,6 +145,18 @@ export class DesignTicketSettingTab extends PluginSettingTab {
 					this.showCategoryLabelsManager();
 				}));
 
+		// Priority Labels Section
+		containerEl.createEl('h3', {text: 'Priority Labels'});
+
+		new Setting(containerEl)
+			.setName('Priority Labels')
+			.setDesc('Available priority options (low, medium, high, urgent)')
+			.addButton(button => button
+				.setButtonText('Manage Labels')
+				.onClick(() => {
+					this.showPriorityLabelsManager();
+				}));
+
 		// Template Management Section
 		containerEl.createEl('h3', {text: 'Template Management'});
 
@@ -231,6 +245,11 @@ export class DesignTicketSettingTab extends PluginSettingTab {
 		const modal = new CategoryLabelsModal(this.app, this.plugin);
 		modal.open();
 	}
+
+	showPriorityLabelsManager(): void {
+		const modal = new PriorityLabelsModal(this.app, this.plugin);
+		modal.open();
+	}
 }
 
 // Story Point Labels Modal
@@ -295,6 +314,43 @@ class CategoryLabelsModal extends Modal {
 		textarea.inputEl.style.height = '200px';
 
 		contentEl.createEl('p', { text: 'Enter one category label per line (e.g., "UI", "UX", "Web Experience")' });
+
+		new ButtonComponent(contentEl)
+			.setButtonText('Save & Close')
+			.onClick(() => this.close());
+	}
+
+	onClose() {
+		const { contentEl } = this;
+		contentEl.empty();
+	}
+}
+
+// Priority Labels Modal
+class PriorityLabelsModal extends Modal {
+	plugin: DesignTicketPlugin;
+
+	constructor(app: App, plugin: DesignTicketPlugin) {
+		super(app);
+		this.plugin = plugin;
+	}
+
+	onOpen() {
+		const { contentEl } = this;
+		contentEl.createEl('h2', { text: 'Manage Priority Labels' });
+
+		const textarea = new TextAreaComponent(contentEl)
+			.setPlaceholder('Enter priority labels, one per line')
+			.setValue(this.plugin.settings.priorityLabels.join('\n'))
+			.onChange(async (value) => {
+				this.plugin.settings.priorityLabels = value.split('\n').filter(line => line.trim());
+				await this.plugin.saveSettings();
+			});
+
+		textarea.inputEl.style.width = '100%';
+		textarea.inputEl.style.height = '200px';
+
+		contentEl.createEl('p', { text: 'Enter one priority label per line (e.g., "low", "medium", "high", "urgent")' });
 
 		new ButtonComponent(contentEl)
 			.setButtonText('Save & Close')

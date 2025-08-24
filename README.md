@@ -18,6 +18,9 @@ Convert your Obsidian design notes into GitLab tickets with professional templat
 - **Assignee and label suggestions**
 
 ### 🎯 **Enhanced GitLab Integration**
+- **Automatic assignee assignment** from Obsidian notes
+- **Smart label transfer** including story points and priority
+- **Story point mapping** to GitLab weight field
 - **Due date support** in tickets
 - **Priority management** with labels
 - **Enhanced error handling** and notifications
@@ -97,14 +100,20 @@ due-date: "2024-09-01"
 - **Use command**: `Ctrl/Cmd + P` → "New Design Ticket"
 - **Result**: New note with full template, ready to fill
 
-### **2. Insert Template in Existing Note**
+### **2. Set Assignee and Labels in Obsidian**
+- **Edit the frontmatter** to set assignee: `assignee: "Andre Lima"`
+- **Add labels**: `labels: "UI,UX,Design System"`
+- **Set story points**: `**Story points:** [21 pts]` in the Quick Info section
+- **Set priority**: `priority: "high"` in frontmatter
+
+### **3. Insert Template in Existing Note**
 - **Use command**: `Ctrl/Cmd + P` → "Insert Design Template"
 - **Result**: Template inserted at cursor position
 
-### **3. Create GitLab Ticket**
+### **4. Create GitLab Ticket with Auto-Assignment**
 - **Click the ticket icon** (🎫) in left sidebar
 - **Use command**: `Ctrl/Cmd + P` → "Create GitLab Ticket"
-- **Result**: Ticket created and opened in browser
+- **Result**: GitLab ticket created with automatic assignee, labels, and story points
 
 ## ⚙️ **Enhanced Settings**
 
@@ -145,6 +154,26 @@ due-date: "2024-09-01"
 - **UX designers** documenting user flows
 - **Design system maintainers** tracking component updates
 - **Stakeholders** reviewing design requirements
+
+## 🔄 **Automatic Assignment & Label Transfer**
+
+The enhanced plugin automatically reads your Obsidian notes and transfers key information to GitLab:
+
+### **What Gets Automatically Set:**
+- **Assignee**: Maps username from note to GitLab user ID
+- **Labels**: Combines note labels with default labels
+- **Story Points**: Converts to GitLab weight field
+- **Priority**: Added as priority label
+- **Project ID**: Uses note frontmatter or default setting
+
+### **Example Workflow:**
+1. **Create note** with `assignee: "Andre Lima"` and `labels: "UI,UX"`
+2. **Set story points** as `**Story points:** [21 pts]`
+3. **Click ticket icon** → Plugin automatically:
+   - Finds GitLab user "Andre Lima"
+   - Sets assignee to that user
+   - Adds labels: "UI", "UX", "21 Story Points", "Priority: high"
+   - Sets weight field to 21
 
 ## 🚀 **Installation**
 

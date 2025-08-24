@@ -1,0 +1,9 @@
+{
+  "id": "design-ticket-manager",
+  "name": "Design Ticket Manager",
+  "version": "1.0.0",
+  "minAppVersion": "0.15.0",
+  "description": "Convert Obsidian design notes into GitLab tickets",
+  "author": "Your Name",
+  "isDesktopOnly": false
+}

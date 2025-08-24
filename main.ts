@@ -80,10 +80,16 @@ export default class DesignTicketPlugin extends Plugin {
 		const today = new Date().toISOString().split('T')[0];
 		const dueDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
 		
+		// Get available story point labels
+		const storyPointOptions = this.settings.storyPointLabels.map(label => `[${label}]`).join(' ');
+		
+		// Get available category labels
+		const categoryOptions = this.settings.categoryLabels.join(', ');
+		
 		return `---
 gitlab-project-id: "${this.settings.defaultProjectId}"
 assignee: "${this.settings.defaultAssignee}"
-labels: "${this.settings.defaultLabels}"
+labels: "${categoryOptions}"
 priority: "${this.settings.defaultPriority}"
 due-date: "${dueDate}"
 ---
@@ -91,7 +97,7 @@ due-date: "${dueDate}"
 # 🎨 [Design Task Title]
 
 ## 📋 Quick Info
-**Timeline:** ${today} → ${dueDate} | **Story points:** [X pts]  
+**Timeline:** ${today} → ${dueDate} | **Story points:** ${storyPointOptions}  
 **Figma:** [Paste Figma handoff link here]  
 **Status:** Draft  
 
@@ -196,10 +202,20 @@ due-date: "${dueDate}"
 			metadata.labels = labelsMatch[1].split(',').map((label: string) => label.trim());
 		}
 
-		// Extract story points from content
+		// Extract story points from content (multiple formats)
 		const storyPointsMatch = content.match(/\*\*Story points:\*\*\s*\[(\d+)\s*pts\]/);
 		if (storyPointsMatch) {
 			metadata.storyPoints = parseInt(storyPointsMatch[1]);
+		} else {
+			// Try to match from the new story point label format
+			const storyPointLabelMatch = content.match(/\*\*Story points:\*\*\s*\[([^\]]+)\]/);
+			if (storyPointLabelMatch) {
+				const storyPointText = storyPointLabelMatch[1];
+				const numberMatch = storyPointText.match(/(\d+)/);
+				if (numberMatch) {
+					metadata.storyPoints = parseInt(numberMatch[1]);
+				}
+			}
 		}
 
 		// Extract priority from frontmatter or content

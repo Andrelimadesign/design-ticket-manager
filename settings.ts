@@ -1,4 +1,4 @@
-import { App, PluginSettingTab, Setting, Notice } from 'obsidian';
+import { App, PluginSettingTab, Setting, Notice, Modal, TextAreaComponent, ButtonComponent } from 'obsidian';
 import DesignTicketPlugin from './main';
 
 export interface Settings {
@@ -8,6 +8,8 @@ export interface Settings {
 	defaultAssignee: string;
 	defaultLabels: string;
 	defaultPriority: string;
+	storyPointLabels: string[];
+	categoryLabels: string[];
 	customTemplates: Array<{
 		name: string;
 		content: string;
@@ -22,6 +24,8 @@ export const DEFAULT_SETTINGS: Settings = {
 	defaultAssignee: '',
 	defaultLabels: 'design',
 	defaultPriority: 'medium',
+	storyPointLabels: ['1 Story Point', '2 Story Points', '3 Story Points', '5 Story Points', '8 Story Points', '13 Story Points', '21 Story Points'],
+	categoryLabels: ['UI', 'UX', 'Web Experience / Website development'],
 	customTemplates: []
 }
 
@@ -115,6 +119,30 @@ export class DesignTicketSettingTab extends PluginSettingTab {
 					await this.plugin.saveSettings();
 				}));
 
+		// Story Point Labels Section
+		containerEl.createEl('h3', {text: 'Story Point Labels'});
+
+		new Setting(containerEl)
+			.setName('Story Point Labels')
+			.setDesc('Available story point labels for tickets')
+			.addButton(button => button
+				.setButtonText('Manage Labels')
+				.onClick(() => {
+					this.showStoryPointLabelsManager();
+				}));
+
+		// Category Labels Section
+		containerEl.createEl('h3', {text: 'Category Labels'});
+
+		new Setting(containerEl)
+			.setName('Category Labels')
+			.setDesc('Available category labels (UI, UX, etc.)')
+			.addButton(button => button
+				.setButtonText('Manage Labels')
+				.onClick(() => {
+					this.showCategoryLabelsManager();
+				}));
+
 		// Template Management Section
 		containerEl.createEl('h3', {text: 'Template Management'});
 
@@ -192,5 +220,89 @@ export class DesignTicketSettingTab extends PluginSettingTab {
 		} catch (error: any) {
 			new Notice(`❌ Error: ${error.message}`);
 		}
+	}
+
+	showStoryPointLabelsManager(): void {
+		const modal = new StoryPointLabelsModal(this.app, this.plugin);
+		modal.open();
+	}
+
+	showCategoryLabelsManager(): void {
+		const modal = new CategoryLabelsModal(this.app, this.plugin);
+		modal.open();
+	}
+}
+
+// Story Point Labels Modal
+class StoryPointLabelsModal extends Modal {
+	plugin: DesignTicketPlugin;
+
+	constructor(app: App, plugin: DesignTicketPlugin) {
+		super(app);
+		this.plugin = plugin;
+	}
+
+	onOpen() {
+		const { contentEl } = this;
+		contentEl.createEl('h2', { text: 'Manage Story Point Labels' });
+
+		const textarea = new TextAreaComponent(contentEl)
+			.setPlaceholder('Enter story point labels, one per line')
+			.setValue(this.plugin.settings.storyPointLabels.join('\n'))
+			.onChange(async (value) => {
+				this.plugin.settings.storyPointLabels = value.split('\n').filter(line => line.trim());
+				await this.plugin.saveSettings();
+			});
+
+		textarea.inputEl.style.width = '100%';
+		textarea.inputEl.style.height = '200px';
+
+		contentEl.createEl('p', { text: 'Enter one story point label per line (e.g., "1 Story Point", "2 Story Points")' });
+
+		new ButtonComponent(contentEl)
+			.setButtonText('Save & Close')
+			.onClick(() => this.close());
+	}
+
+	onClose() {
+		const { contentEl } = this;
+		contentEl.empty();
+	}
+}
+
+// Category Labels Modal
+class CategoryLabelsModal extends Modal {
+	plugin: DesignTicketPlugin;
+
+	constructor(app: App, plugin: DesignTicketPlugin) {
+		super(app);
+		this.plugin = plugin;
+	}
+
+	onOpen() {
+		const { contentEl } = this;
+		contentEl.createEl('h2', { text: 'Manage Category Labels' });
+
+		const textarea = new TextAreaComponent(contentEl)
+			.setPlaceholder('Enter category labels, one per line')
+			.setValue(this.plugin.settings.categoryLabels.join('\n'))
+			.onChange(async (value) => {
+				this.plugin.settings.categoryLabels = value.split('\n').filter(line => line.trim());
+				await this.plugin.saveSettings();
+			});
+
+		textarea.inputEl.style.width = '100%';
+		textarea.inputEl.style.height = '200px';
+
+		contentEl.createEl('p', { text: 'Enter one category label per line (e.g., "UI", "UX", "Web Experience")' });
+
+		new ButtonComponent(contentEl)
+			.setButtonText('Save & Close')
+			.onClick(() => this.close());
+	}
+
+	onClose() {
+		const { contentEl } = this;
+		contentEl.empty();
 	}
 }

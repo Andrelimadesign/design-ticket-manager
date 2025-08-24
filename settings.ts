@@ -25,8 +25,8 @@ export const DEFAULT_SETTINGS: Settings = {
 	defaultAssignee: 'Andre Lima',
 	defaultLabels: 'design',
 	defaultPriority: 'medium',
-	storyPointLabels: ['1 Story Point', '2 Story Points', '3 Story Points', '5 Story Points', '8 Story Points', '13 Story Points', '21 Story Points'],
-	categoryLabels: ['UI', 'UX', 'Web Experience / Website development'],
+	storyPointLabels: ['1 Story Point', '3 Story Points', '5 Story Points', '8 Story Points', '13 Story Points', '21 Story Points'],
+	categoryLabels: ['UI', 'UX', 'Component', 'design-system', 'new-feature', 'improvement', 'bug-fix', 'blocked', 'in-progress', 'review', 'ready-dev'],
 	priorityLabels: ['low', 'medium', 'high', 'urgent'],
 	customTemplates: []
 }

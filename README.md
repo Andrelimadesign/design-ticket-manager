@@ -6,8 +6,9 @@ Convert your Obsidian design notes into GitLab tickets with professional templat
 
 ### 🎨 **Professional Design Ticket Templates**
 - **Built-in comprehensive template** with all sections you need
+- **Enhanced template** with detailed sections and guidance
 - **Smart auto-filling** for dates, project info, and defaults
-- **Multiple template types** (Design, Simple, Custom)
+- **Multiple template types** (Design, Enhanced, Custom)
 - **Template insertion commands** for existing notes
 
 ### 🚀 **Automation & Smart Features**
@@ -26,8 +27,9 @@ Convert your Obsidian design notes into GitLab tickets with professional templat
 - **Enhanced error handling** and notifications
 - **Connection testing** in settings
 
-## 🎨 **Professional Template Structure**
+## 🎨 **Template Types**
 
+### **Standard Design Template**
 Your design tickets now include:
 
 ```markdown
@@ -93,12 +95,142 @@ due-date: "2024-09-01"
 *Created: 2024-08-24 | Updated: 2024-08-24*
 ```
 
+### **Enhanced Design Template**
+For more comprehensive design tasks, use the enhanced template with:
+
+```markdown
+---
+gitlab-project-id: "12345"
+assignee: "designer"
+labels: "UI,UX,Component,design-system,new-feature,improvement,bug-fix,blocked,in-progress,review,ready-dev"
+priority: "low,medium,high,urgent"
+due-date: "2024-09-01"
+story-points: 
+---
+
+# 🎨 [Design Task Title]
+
+## 📋 Quick Info
+**Timeline:** 2024-08-24 → 2024-09-01 | **Story points:** [1 Story Point] [3 Story Points] [5 Story Points] [8 Story Points] [13 Story Points] [21 Story Points]  
+**Figma:** [Paste Figma handoff link here]  
+**Status:** Draft  
+**Priority:** [low] [medium] [high] [urgent]
+**Labels:** [UI] [UX] [Component] [design-system] [new-feature] [improvement] [bug-fix] [blocked] [in-progress] [review] [ready-dev]
+
+---
+
+## 🎯 Problem / Opportunity
+*What are we solving and why does it matter?*
+
+[Brief description of the user problem or business opportunity - 1-2 sentences max]
+
+## 💡 Proposed Solution
+*What are we building?*
+
+[Clear description of the design solution - what will users see/experience?]
+
+## 🔧 Technical Specifications
+### Frontend Requirements
+- **Components needed:** [List new/modified components]
+- **Motion/Animations:** [Describe transitions, microinteractions, timing]
+- **Breakpoints:** Mobile, Tablet, Desktop
+- **Browser support:** [Specify if different from standard]
+- **Accessibility:** [Any specific WCAG requirements]
+
+### Design System Impact
+- [ ] Uses existing components only
+- [ ] Requires new components (list below)
+- [ ] Updates existing patterns
+- [ ] Creates new patterns
+
+*New components needed:*
+- Component 1: [brief description]
+- Component 2: [brief description]
+
+## 🔗 Dependencies
+### Blocked by:
+- [ ] [Dependency 1 - what's needed first]
+- [ ] [Dependency 2 - what's needed first]
+
+### Blocks:
+- [ ] [What this blocks - other tickets waiting]
+
+## ✅ Definition of Done
+- [ ] Design matches Figma specs
+- [ ] Responsive on all breakpoints
+- [ ] Passes accessibility review
+- [ ] Works with existing design system
+- [ ] Developer handoff completed
+- [ ] Stakeholder approval received
+
+## 📎 Resources
+**Design System:** [Link to design system]  
+**Related Tickets:** [Links to related GitLab issues]  
+**User Research:** [Link to research/user feedback if any]  
+**Brand Guidelines:** [Link if relevant]
+
+## 💬 Notes & Context
+*Anything else the team should know?*
+
+[Optional: Additional context, constraints, or considerations]
+
+---
+
+## 🎛️ Template Options
+### Story Points Options:
+- `1 Story Point` - Very small task, minimal effort
+- `3 Story Points` - Small task, clear requirements
+- `5 Story Points` - Medium task, some complexity
+- `8 Story Points` - Complex task, multiple components
+- `13 Story Points` - Large task, significant effort
+- `21 Story Points` - Epic task, needs breakdown
+
+### Priority Options:
+- `low` - Nice to have, no rush
+- `medium` - Standard priority
+- `high` - Important, affects timeline
+- `urgent` - Critical, blocks other work
+
+### Label Options:
+**Design Type:**
+- `UI` - User interface design
+- `UX` - User experience design
+- `Component` - Design system component work
+
+**Component Type:**
+- `design-system` - Design system work
+- `new-feature` - New functionality
+- `improvement` - Enhancement to existing
+- `bug-fix` - Fixing design issues
+
+**Status:**
+- `blocked` - Cannot proceed
+- `in-progress` - Currently working
+- `review` - Ready for feedback
+- `ready-dev` - Ready for development
+
+### Assignee Quick Reference:
+- `designer` - Design Lead
+
+---
+*Created: 2024-08-24 | Updated: 2024-08-24*
+```
+
 ## 🚀 **How to Use**
 
 ### **1. Create New Design Ticket**
 - **Click the ribbon icon** (➕ with circle) for instant template
 - **Use command**: `Ctrl/Cmd + P` → "New Design Ticket"
+
+### **2. Create Enhanced Design Ticket**
+- **Click the ribbon icon** (➕) for enhanced template
+- **Use command**: `Ctrl/Cmd + P` → "New Enhanced Design Ticket"
 - **Result**: New note with full template, ready to fill
+
+### **3. Insert Templates into Existing Notes**
+- **Insert standard template**: `Ctrl/Cmd + P` → "Insert Design Template"
+- **Insert enhanced template**: `Ctrl/Cmd + P` → "Insert Enhanced Design Template"
+- **Click ribbon icon** (⭐) to insert enhanced template into active note
 
 ### **2. Set Assignee and Labels in Obsidian**
 - **Edit the frontmatter** to set assignee: `assignee: "Andre Lima"`

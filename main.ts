@@ -19,6 +19,14 @@ export default class DesignTicketPlugin extends Plugin {
 			this.createGitLabTicket();
 		});
 
+		this.addRibbonIcon('star', 'Insert Enhanced Template', () => {
+			this.insertEnhancedTemplateToActiveNote();
+		});
+
+		this.addRibbonIcon('plus', 'Create Enhanced Design Ticket', () => {
+			this.createNewEnhancedDesignTicket();
+		});
+
 		// Add commands
 		this.addCommand({
 			id: 'new-design-ticket',
@@ -27,9 +35,21 @@ export default class DesignTicketPlugin extends Plugin {
 		});
 
 		this.addCommand({
+			id: 'new-enhanced-design-ticket',
+			name: 'New Enhanced Design Ticket',
+			callback: () => this.createNewEnhancedDesignTicket()
+		});
+
+		this.addCommand({
 			id: 'insert-design-template',
 			name: 'Insert Design Template',
 			editorCallback: (editor: Editor) => this.insertDesignTemplate(editor)
+		});
+
+		this.addCommand({
+			id: 'insert-enhanced-design-template',
+			name: 'Insert Enhanced Design Template',
+			editorCallback: (editor: Editor) => this.insertEnhancedDesignTemplate(editor)
 		});
 
 		this.addCommand({
@@ -70,10 +90,42 @@ export default class DesignTicketPlugin extends Plugin {
 		}
 	}
 
+	async createNewEnhancedDesignTicket() {
+		const template = this.getEnhancedDesignTemplate();
+		const fileName = `Enhanced Design Ticket ${new Date().toISOString().split('T')[0]}`;
+		
+		try {
+			const file = await this.app.vault.create(`${fileName}.md`, template);
+			await this.app.workspace.openLinkText(file.path, '', true);
+			new Notice('✅ Enhanced design ticket template created!');
+		} catch (error) {
+			new Notice('❌ Error creating template: ' + error.message);
+		}
+	}
+
 	insertDesignTemplate(editor: Editor) {
 		const template = this.getDesignTemplate();
 		editor.replaceSelection(template);
 		new Notice('✅ Design template inserted!');
+	}
+
+	insertEnhancedDesignTemplate(editor: Editor) {
+		const template = this.getEnhancedDesignTemplate();
+		editor.replaceSelection(template);
+		new Notice('✅ Enhanced design template inserted!');
+	}
+
+	async insertEnhancedTemplateToActiveNote() {
+		const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
+		if (!activeView) {
+			new Notice('❌ Please open a note first');
+			return;
+		}
+
+		const editor = activeView.editor;
+		const template = this.getEnhancedDesignTemplate();
+		editor.replaceSelection(template);
+		new Notice('✅ Enhanced design template inserted!');
 	}
 
 	getDesignTemplate(): string {
@@ -95,6 +147,7 @@ assignee: "${this.settings.defaultAssignee}"
 labels: "${categoryOptions}"
 priority: "${priorityOptions}"
 due-date: "${dueDate}"
+story-points: 
 ---
 
 # 🎨 [Design Task Title]
@@ -103,12 +156,20 @@ due-date: "${dueDate}"
 **Timeline:** ${today} → ${dueDate} | **Story points:** ${storyPointOptions}  
 **Figma:** [Paste Figma handoff link here]  
 **Status:** Draft  
+**Priority:** ${priorityOptions}
+**Labels:** ${categoryOptions}
+
+---
 
 ## 🎯 Problem / Opportunity
 *What are we solving and why does it matter?*
 
+[Brief description of the user problem or business opportunity - 1-2 sentences max]
+
 ## 💡 Proposed Solution
 *What are we building?*
+
+[Clear description of the design solution - what will users see/experience?]
 
 ## 🔧 Technical Specifications
 ### Frontend Requirements
@@ -124,9 +185,14 @@ due-date: "${dueDate}"
 - [ ] Updates existing patterns
 - [ ] Creates new patterns
 
+*New components needed:*
+- Component 1: [brief description]
+- Component 2: [brief description]
+
 ## 🔗 Dependencies
 ### Blocked by:
 - [ ] [Dependency 1 - what's needed first]
+- [ ] [Dependency 2 - what's needed first]
 
 ### Blocks:
 - [ ] [What this blocks - other tickets waiting]
@@ -143,9 +209,180 @@ due-date: "${dueDate}"
 **Design System:** [Link to design system]  
 **Related Tickets:** [Links to related GitLab issues]  
 **User Research:** [Link to research/user feedback if any]  
+**Brand Guidelines:** [Link if relevant]
 
 ## 💬 Notes & Context
 *Anything else the team should know?*
+
+[Optional: Additional context, constraints, or considerations]
+
+---
+
+## 🎛️ Template Options
+### Story Points Options:
+- \`1 Story Point\` - Very small task, minimal effort
+- \`3 Story Points\` - Small task, clear requirements
+- \`5 Story Points\` - Medium task, some complexity
+- \`8 Story Points\` - Complex task, multiple components
+- \`13 Story Points\` - Large task, significant effort
+- \`21 Story Points\` - Epic task, needs breakdown
+
+### Priority Options:
+- \`low\` - Nice to have, no rush
+- \`medium\` - Standard priority
+- \`high\` - Important, affects timeline
+- \`urgent\` - Critical, blocks other work
+
+### Label Options:
+**Design Type:**
+- \`UI\` - User interface design
+- \`UX\` - User experience design
+- \`Component\` - Design system component work
+
+**Component Type:**
+- \`design-system\` - Design system work
+- \`new-feature\` - New functionality
+- \`improvement\` - Enhancement to existing
+- \`bug-fix\` - Fixing design issues
+
+**Status:**
+- \`blocked\` - Cannot proceed
+- \`in-progress\` - Currently working
+- \`review\` - Ready for feedback
+- \`ready-dev\` - Ready for development
+
+### Assignee Quick Reference:
+- \`${this.settings.defaultAssignee}\` - Design Lead
+
+		---
+*Created: ${today} | Updated: ${today}*`;
+	}
+
+	getEnhancedDesignTemplate(): string {
+		const today = new Date().toISOString().split('T')[0];
+		const dueDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+		
+		// Get available story point labels
+		const storyPointOptions = this.settings.storyPointLabels.map(label => `[${label}]`).join(' ');
+		
+		// Get available category labels as options
+		const categoryOptions = this.settings.categoryLabels.map(label => `[${label}]`).join(' ');
+		
+		// Get available priority labels as options
+		const priorityOptions = this.settings.priorityLabels.map(label => `[${label}]`).join(' ');
+		
+		return `---
+gitlab-project-id: "${this.settings.defaultProjectId}"
+assignee: "${this.settings.defaultAssignee}"
+labels: "${categoryOptions}"
+priority: "${priorityOptions}"
+due-date: "${dueDate}"
+story-points: 
+---
+
+# 🎨 [Design Task Title]
+
+## 📋 Quick Info
+**Timeline:** ${today} → ${dueDate} | **Story points:** ${storyPointOptions}  
+**Figma:** [Paste Figma handoff link here]  
+**Status:** Draft  
+**Priority:** ${priorityOptions}
+**Labels:** ${categoryOptions}
+
+---
+
+## 🎯 Problem / Opportunity
+*What are we solving and why does it matter?*
+
+[Brief description of the user problem or business opportunity - 1-2 sentences max]
+
+## 💡 Proposed Solution
+*What are we building?*
+
+[Clear description of the design solution - what will users see/experience?]
+
+## 🔧 Technical Specifications
+### Frontend Requirements
+- **Components needed:** [List new/modified components]
+- **Motion/Animations:** [Describe transitions, microinteractions, timing]
+- **Breakpoints:** Mobile, Tablet, Desktop
+- **Browser support:** [Specify if different from standard]
+- **Accessibility:** [Any specific WCAG requirements]
+
+### Design System Impact
+- [ ] Uses existing components only
+- [ ] Requires new components (list below)
+- [ ] Updates existing patterns
+- [ ] Creates new patterns
+
+*New components needed:*
+- Component 1: [brief description]
+- Component 2: [brief description]
+
+## 🔗 Dependencies
+### Blocked by:
+- [ ] [Dependency 1 - what's needed first]
+- [ ] [Dependency 2 - what's needed first]
+
+### Blocks:
+- [ ] [What this blocks - other tickets waiting]
+
+## ✅ Definition of Done
+- [ ] Design matches Figma specs
+- [ ] Responsive on all breakpoints
+- [ ] Passes accessibility review
+- [ ] Works with existing design system
+- [ ] Developer handoff completed
+- [ ] Stakeholder approval received
+
+## 📎 Resources
+**Design System:** [Link to design system]  
+**Related Tickets:** [Links to related GitLab issues]  
+**User Research:** [Link to research/user feedback if any]  
+**Brand Guidelines:** [Link if relevant]
+
+## 💬 Notes & Context
+*Anything else the team should know?*
+
+[Optional: Additional context, constraints, or considerations]
+
+---
+
+## 🎛️ Template Options
+### Story Points Options:
+- \`1 Story Point\` - Very small task, minimal effort
+- \`3 Story Points\` - Small task, clear requirements
+- \`5 Story Points\` - Medium task, some complexity
+- \`8 Story Points\` - Complex task, multiple components
+- \`13 Story Points\` - Large task, significant effort
+- \`21 Story Points\` - Epic task, needs breakdown
+
+### Priority Options:
+- \`low\` - Nice to have, no rush
+- \`medium\` - Standard priority
+- \`high\` - Important, affects timeline
+- \`urgent\` - Critical, blocks other work
+
+### Label Options:
+**Design Type:**
+- \`UI\` - User interface design
+- \`UX\` - User experience design
+- \`Component\` - Design system component work
+
+**Component Type:**
+- \`design-system\` - Design system work
+- \`new-feature\` - New functionality
+- \`improvement\` - Enhancement to existing
+- \`bug-fix\` - Fixing design issues
+
+**Status:**
+- \`blocked\` - Cannot proceed
+- \`in-progress\` - Currently working
+- \`review\` - Ready for feedback
+- \`ready-dev\` - Ready for development
+
+### Assignee Quick Reference:
+- \`${this.settings.defaultAssignee}\` - Design Lead
 
 ---
 *Created: ${today} | Updated: ${today}*`;

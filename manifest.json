@@ -1,0 +1,10 @@
+{
+	"id": "design-ticket-manager",
+	"name": "Design Ticket Manager",
+	"version": "1.0.0",
+	"minAppVersion": "0.15.0",
+	"description": "Convert Obsidian design notes into GitLab tickets with automatic assignee and label transfer",
+	"author": "Andre Lima",
+	"authorUrl": "https://github.com/Andrelimadesign",
+	"isDesktopOnly": false
+}

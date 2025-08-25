@@ -175,9 +175,7 @@ story-points:
 ### Frontend Requirements
 - **Components needed:** [List new/modified components]
 - **Motion/Animations:** [Describe transitions, microinteractions, timing]
-- **Breakpoints:** Mobile, Tablet, Desktop
-- **Browser support:** [Specify if different from standard]
-- **Accessibility:** [Any specific WCAG requirements]
+- **Breakpoints:** Mobile, Desktop
 
 ### Design System Impact
 - [ ] Uses existing components only
@@ -305,9 +303,7 @@ story-points:
 ### Frontend Requirements
 - **Components needed:** [List new/modified components]
 - **Motion/Animations:** [Describe transitions, microinteractions, timing]
-- **Breakpoints:** Mobile, Tablet, Desktop
-- **Browser support:** [Specify if different from standard]
-- **Accessibility:** [Any specific WCAG requirements]
+- **Breakpoints:** Mobile, Desktop
 
 ### Design System Impact
 - [ ] Uses existing components only
@@ -391,96 +387,22 @@ story-points:
 	async createGitLabTicket() {
 		const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
 		if (!activeView) {
-			new Notice('❌ Please open a design ticket note first');
+			new Notice('❌ Please open a note first');
 			return;
 		}
 
 		const file = activeView.file;
 		if (!file) {
-			new Notice('❌ No active file found');
+			new Notice('❌ No file found');
 			return;
 		}
-
-		try {
-			// Parse the note content to extract metadata
-			const content = await this.app.vault.read(file);
-			const metadata = this.parseNoteMetadata(content);
-			
-			// Create GitLab ticket with extracted metadata
-			await this.createGitLabTicketFromMetadata(metadata, content);
-			
-		} catch (error) {
-			new Notice('❌ Error creating GitLab ticket: ' + error.message);
-		}
-	}
-
-	parseNoteMetadata(content: string): any {
-		const metadata: any = {
-			title: '',
-			assignee: '',
-			labels: [],
-			storyPoints: 0,
-			priority: 'medium',
-			projectId: this.settings.defaultProjectId
-		};
-
-		// Extract title from first heading
-		const titleMatch = content.match(/^# 🎨 (.+)$/m);
-		if (titleMatch) {
-			metadata.title = titleMatch[1].replace(/[\[\]]/g, ''); // Remove brackets
-		}
-
-		// Extract assignee from frontmatter or content
-		const assigneeMatch = content.match(/assignee:\s*"([^"]+)"/);
-		if (assigneeMatch) {
-			metadata.assignee = assigneeMatch[1];
-		}
-
-		// Extract labels from frontmatter or content
-		const labelsMatch = content.match(/labels:\s*"([^"]+)"/);
-		if (labelsMatch) {
-			metadata.labels = labelsMatch[1].split(',').map((label: string) => label.trim());
-		}
-
-		// Extract story points from content (multiple formats)
-		const storyPointsMatch = content.match(/\*\*Story points:\*\*\s*\[(\d+)\s*pts\]/);
-		if (storyPointsMatch) {
-			metadata.storyPoints = parseInt(storyPointsMatch[1]);
-		} else {
-			// Try to match from the new story point label format
-			const storyPointLabelMatch = content.match(/\*\*Story points:\*\*\s*\[([^\]]+)\]/);
-			if (storyPointLabelMatch) {
-				const storyPointText = storyPointLabelMatch[1];
-				const numberMatch = storyPointText.match(/(\d+)/);
-				if (numberMatch) {
-					metadata.storyPoints = parseInt(numberMatch[1]);
-				}
-			}
-		}
-
-		// Extract priority from frontmatter or content
-		const priorityMatch = content.match(/priority:\s*"([^"]+)"/);
-		if (priorityMatch) {
-			metadata.priority = priorityMatch[1];
-		}
-
-		// Extract project ID from frontmatter
-		const projectMatch = content.match(/gitlab-project-id:\s*"([^"]+)"/);
-		if (projectMatch) {
-			metadata.projectId = projectMatch[1];
-		}
-
-		return metadata;
-	}
-
-	async createGitLabTicketFromMetadata(metadata: any, content: string) {
-		if (!this.settings.gitlabToken) {
-			new Notice('❌ Please configure GitLab token in settings');
-			return;
-		}
-
+		const content = await this.app.vault.read(file);
+		
+		// Parse frontmatter and content
+		const metadata = this.parseFrontmatter(content);
+		
 		if (!metadata.projectId) {
-			new Notice('❌ Please set gitlab-project-id in note frontmatter or settings');
+			new Notice('❌ No GitLab project ID found in note frontmatter');
 			return;
 		}
 
@@ -512,27 +434,27 @@ story-points:
 				weight: metadata.storyPoints || null
 			};
 
-					// Sanitize inputs to prevent encoding issues
-		const cleanToken = this.settings.gitlabToken.trim();
-		const cleanUrl = this.settings.gitlabUrl.trim();
-		const cleanProjectId = metadata.projectId.toString().trim();
+			// Sanitize inputs to prevent encoding issues
+			const cleanToken = this.settings.gitlabToken.trim();
+			const cleanUrl = this.settings.gitlabUrl.trim();
+			const cleanProjectId = metadata.projectId.toString().trim();
 
-		const response = await fetch(`${cleanUrl}/api/v4/projects/${cleanProjectId}/issues`, {
-			method: 'POST',
-			headers: {
-				'Authorization': `Bearer ${cleanToken}`,
-				'Content-Type': 'application/json',
-				'Accept': 'application/json'
-			},
-			body: JSON.stringify(issueData)
-		});
+			const response = await fetch(`${cleanUrl}/api/v4/projects/${cleanProjectId}/issues`, {
+				method: 'POST',
+				headers: {
+					'Authorization': `Bearer ${cleanToken}`,
+					'Content-Type': 'application/json',
+					'Accept': 'application/json'
+				},
+				body: JSON.stringify(issueData)
+			});
 
 			if (response.ok) {
 				const issue = await response.json();
 				new Notice('✅ GitLab ticket created successfully!');
 				
 				// Open the ticket in browser
-				const ticketUrl = `${this.settings.gitlabUrl}/${issue.web_url}`;
+				const ticketUrl = `${cleanUrl}/${issue.web_url}`;
 				window.open(ticketUrl, '_blank');
 			} else {
 				const errorData = await response.json();
@@ -548,18 +470,18 @@ story-points:
 	async getGitLabUserId(username: string): Promise<number | null> {
 		try {
 			// Search for user by username
-					// Sanitize inputs to prevent encoding issues
-		const cleanToken = this.settings.gitlabToken.trim();
-		const cleanUrl = this.settings.gitlabUrl.trim();
-		const cleanUsername = username.trim();
+			// Sanitize inputs to prevent encoding issues
+			const cleanToken = this.settings.gitlabToken.trim();
+			const cleanUrl = this.settings.gitlabUrl.trim();
+			const cleanUsername = username.trim();
 
-		const response = await fetch(`${cleanUrl}/api/v4/users?username=${encodeURIComponent(cleanUsername)}`, {
-			headers: {
-				'Authorization': `Bearer ${cleanToken}`,
-				'Content-Type': 'application/json',
-				'Accept': 'application/json'
-			}
-		});
+			const response = await fetch(`${cleanUrl}/api/v4/users?username=${encodeURIComponent(cleanUsername)}`, {
+				headers: {
+					'Authorization': `Bearer ${cleanToken}`,
+					'Content-Type': 'application/json',
+					'Accept': 'application/json'
+				}
+			});
 
 			if (response.ok) {
 				const users = await response.json();
@@ -591,5 +513,47 @@ story-points:
 
 	async manageTemplates() {
 		new Notice('📝 Template management coming soon! Use commands for now.');
+	}
+
+	parseFrontmatter(content: string): any {
+		const frontmatterMatch = content.match(/^---\n([\s\S]*?)\n---/);
+		if (!frontmatterMatch) {
+			return {};
+		}
+
+		const frontmatter = frontmatterMatch[1];
+		const metadata: any = {};
+
+		// Parse key-value pairs
+		const lines = frontmatter.split('\n');
+		for (const line of lines) {
+			const [key, ...valueParts] = line.split(':');
+			if (key && valueParts.length > 0) {
+				const value = valueParts.join(':').trim().replace(/"/g, '');
+				
+				switch (key.trim()) {
+					case 'gitlab-project-id':
+						metadata.projectId = value;
+						break;
+					case 'assignee':
+						metadata.assignee = value;
+						break;
+					case 'labels':
+						metadata.labels = value.split(',').map(l => l.trim().replace(/[\[\]]/g, ''));
+						break;
+					case 'priority':
+						metadata.priority = value;
+						break;
+					case 'story-points':
+						metadata.storyPoints = parseInt(value) || 0;
+						break;
+					case 'title':
+						metadata.title = value;
+						break;
+				}
+			}
+		}
+
+		return metadata;
 	}
 }

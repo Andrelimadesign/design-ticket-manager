@@ -512,14 +512,20 @@ story-points:
 				weight: metadata.storyPoints || null
 			};
 
-			const response = await fetch(`${this.settings.gitlabUrl}/api/v4/projects/${metadata.projectId}/issues`, {
-				method: 'POST',
-				headers: {
-					'Authorization': `Bearer ${this.settings.gitlabToken}`,
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify(issueData)
-			});
+					// Sanitize inputs to prevent encoding issues
+		const cleanToken = this.settings.gitlabToken.trim();
+		const cleanUrl = this.settings.gitlabUrl.trim();
+		const cleanProjectId = metadata.projectId.toString().trim();
+
+		const response = await fetch(`${cleanUrl}/api/v4/projects/${cleanProjectId}/issues`, {
+			method: 'POST',
+			headers: {
+				'Authorization': `Bearer ${cleanToken}`,
+				'Content-Type': 'application/json',
+				'Accept': 'application/json'
+			},
+			body: JSON.stringify(issueData)
+		});
 
 			if (response.ok) {
 				const issue = await response.json();
@@ -542,12 +548,18 @@ story-points:
 	async getGitLabUserId(username: string): Promise<number | null> {
 		try {
 			// Search for user by username
-			const response = await fetch(`${this.settings.gitlabUrl}/api/v4/users?username=${encodeURIComponent(username)}`, {
-				headers: {
-					'Authorization': `Bearer ${this.settings.gitlabToken}`,
-					'Content-Type': 'application/json'
-				}
-			});
+					// Sanitize inputs to prevent encoding issues
+		const cleanToken = this.settings.gitlabToken.trim();
+		const cleanUrl = this.settings.gitlabUrl.trim();
+		const cleanUsername = username.trim();
+
+		const response = await fetch(`${cleanUrl}/api/v4/users?username=${encodeURIComponent(cleanUsername)}`, {
+			headers: {
+				'Authorization': `Bearer ${cleanToken}`,
+				'Content-Type': 'application/json',
+				'Accept': 'application/json'
+			}
+		});
 
 			if (response.ok) {
 				const users = await response.json();

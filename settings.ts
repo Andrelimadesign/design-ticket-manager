@@ -207,21 +207,55 @@ export class DesignTicketSettingTab extends PluginSettingTab {
 			return;
 		}
 
+		// Debug: Log the raw values to console
+		console.log('Raw settings values:', {
+			gitlabUrl: gitlabUrl,
+			gitlabToken: gitlabToken ? `${gitlabToken.substring(0, 10)}...` : 'empty',
+			defaultProjectId: defaultProjectId
+		});
+
+		// Validate and sanitize inputs
+		const cleanToken = gitlabToken.trim();
+		const cleanUrl = gitlabUrl.trim();
+		const cleanProjectId = defaultProjectId.toString().trim();
+
+		// Check for non-ASCII characters in token
+		if (!/^[\x00-\x7F]*$/.test(cleanToken)) {
+			console.error('Token contains non-ASCII characters:', cleanToken);
+			new Notice('❌ GitLab token contains invalid characters');
+			return;
+		}
+
+		// Debug: Log the cleaned values
+		console.log('Cleaned values:', {
+			cleanUrl: cleanUrl,
+			cleanToken: cleanToken ? `${cleanToken.substring(0, 10)}...` : 'empty',
+			cleanProjectId: cleanProjectId
+		});
+
 		try {
-			const response = await fetch(`${gitlabUrl}/api/v4/projects/${defaultProjectId}`, {
-				headers: {
-					'Authorization': `Bearer ${gitlabToken}`,
-					'Content-Type': 'application/json'
-				}
+			const headers = {
+				'Authorization': `Bearer ${cleanToken}`,
+				'Content-Type': 'application/json',
+				'Accept': 'application/json'
+			};
+
+			// Debug: Log the headers
+			console.log('Request headers:', headers);
+
+			const response = await fetch(`${cleanUrl}/api/v4/projects/${cleanProjectId}`, {
+				method: 'GET',
+				headers: headers
 			});
 
 			if (response.ok) {
 				new Notice('✅ GitLab connection successful!');
 			} else {
-				const errorData = await response.json();
+				const errorData = await response.json().catch(() => ({ message: response.statusText }));
 				new Notice(`❌ GitLab connection failed: ${errorData.message || response.statusText}`);
 			}
 		} catch (error: any) {
+			console.error('Connection test error:', error);
 			new Notice(`❌ Connection error: ${error.message}`);
 		}
 	}
